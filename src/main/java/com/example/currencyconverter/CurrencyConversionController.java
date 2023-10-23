@@ -1,5 +1,6 @@
 package com.example.currencyconverter;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,9 @@ import java.util.HashMap;
 
 @RestController
 public class CurrencyConversionController {
+
+    @Autowired
+    private CurrencyExchangeProxy currencyExchangeProxy;
 
     @GetMapping("/currency-conversion/from/{from}/to/{to}/quantity/{quantity}")
     public CurrencyConversion getCurrencyConversion(@PathVariable String from, @PathVariable String to, @PathVariable BigDecimal quantity){
@@ -28,4 +32,17 @@ public class CurrencyConversionController {
 
     }
 
+
+    @GetMapping("/currency-conversion-feign/from/{from}/to/{to}/quantity/{quantity}")
+    public CurrencyConversion getCurrencyConversionFeign(@PathVariable String from, @PathVariable String to, @PathVariable BigDecimal quantity){
+
+
+        CurrencyConversion currencyConversion = currencyExchangeProxy.retrieveExchangeValue(from,to);
+        currencyConversion.setQuantity(quantity);
+        currencyConversion.setEnvironment(currencyConversion.getEnvironment()+" , feign");
+        currencyConversion.setTotalCaliculatedAmount(currencyConversion.getConversionMultiple().multiply(currencyConversion.getQuantity()));
+
+        return currencyConversion;
+
+    }
 }
